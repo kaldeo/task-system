@@ -7,6 +7,7 @@ const url = "http://localhost:7890";
 // ######################### ROUTES ############################
 // #############################################################
 // #############################################################
+// #############################################################
 
 // #############################################################
 // ########################## GET ##############################
@@ -272,6 +273,9 @@ function supprimerGroupe(id_groupe) {
             if (response.success) {
                 afficherPopupSucces(response.message);
                 document.querySelector(`.GroupeDansGestion[data-id="${id_groupe}"]`).remove();
+                document.querySelector(`.ajouterGroupeButton[data-id="${id_groupe}"]`).remove();
+
+
             } else {
                 afficherPopupErreur(response.message);
             }
