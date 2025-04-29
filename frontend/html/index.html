@@ -69,40 +69,28 @@
   </div>
 
   <div class="newPageOverlayPourCreerTache" style="display: none;">
-    <div class="newPageContent">
+    <div class="newPageContent" id="newPageContent2">
       <div class="containALLCreerTache">
         <i class="bx bx-x bx-tada-hover bx-lg" id="FermerLaPageAddTask" style="position: absolute; top: 0; left: 0;"></i>
+
         <div class="containCreerTache">
-          <div class="DoubleBoxCreerTache" id="DoubleBoxCreerTache1">
-            <input class="inputNomTache" type="text" placeholder="Entrez un nom pour cette tâche" />
-            <div class="NiveauTache">
-              <label for="niveauTache">Niveau de la Tâche:</label>
-              <select id="niveauTache">
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-              </select>
-            </div>
-            <div class="DeadlineTache">
-              <label for="deadlineTache">Date Limite:</label>
-              <input id="deadlineTache" type="date" />
-            </div>
-            <div class="zoneRechercheTache">
-              <input id="rechercheMembreTache" type="text" placeholder="Rechercher un membre..." />
-              <div id="resultatsRechercheTache" class="resultatsRecherche"></div>
-            </div>
+
+          <input class="inputNomTache" type="text" placeholder="Entrez un nom pour cette tâche" />
+          
+          <div class="NiveauTache">
+            <label for="niveauTache">Niveau de la Tâche :  </label>
+            <select id="niveauTache">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+            </select>
           </div>
 
-          <div class="DoubleBoxCreerTache" id="DoubleBoxCreerTache2">
-            <div class="MembreDansAjoutrerTache">
-              <div class="CoteGaucheAjTache">
-                <div class="NomMembreAjTache"></div>
-              </div>
-              <div class="CoteDroitAjTache">
-                <i class="bx bxs-minus-circle bx-tada-hover bx-lg"></i>
-              </div>
-            </div>
+          <div class="DeadlineTache">
+            <input id="deadlineTache" type="date" />
           </div>
+            
+
         </div>
         <button class="BTNAjouterUneTache">Ajouter la Tâche</button>
       </div>
@@ -129,8 +117,8 @@
           <button id="gestionGroupesButton">Gestion équipes</button>
           <button id="gestionTachesButton">Gestion tâches</button>
           <button>Calendrier (Peut-être)</button>
-          <a href="http://localhost:8082/plant-connect-filtre">Plant-Connect-Filtre</a>
-          <a href="http://localhost:8082/plant-connect-conf">Plant-Connect-Conf</a>
+          <a href="">Plant-Connect-Filtre</a>
+          <a href="">Plant-Connect-Conf</a>
         </div>
         <div class="container2">
           <div class="boitegroupes">

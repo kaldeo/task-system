@@ -103,51 +103,54 @@ router.post('/groupes/:id_groupe/membres', async (req, res) => {
 ////////////////////// Tâches //////////////////////
 ////////////////////////////////////////////////////
 router.post('/ajouterTache', async (req, res) => {
-  const { nom, description, niveau, deadline, membres } = req.body;
-
-  if (!nom || nom.trim() === '') {
-      return res.status(400).send({ success: false, message: 'Le nom de la tâche ne peut pas être vide' });
-  }
-  if (!niveau) {
-      return res.status(400).send({ success: false, message: 'Vous devez choisir un niveau' });
-  }
-  if (!deadline) {
-      return res.status(400).send({ success: false, message: 'Vous devez choisir une date limite' });
-  }
-
-  const conditionTotal = 0;
-  const conditionOK = 0;
-
-  const sqlTache = `
-      INSERT INTO taches (nom, description, niveau, deadline, nb_condition_ok, nb_condition_total)
-      VALUES (?, ?, ?, ?, ?, ?)
-  `;
-  const sqlTacheMembres = `
-      INSERT INTO taches_membres (id_tache, id_membre)
-      VALUES (?, ?)
-  `;
-  const sqlLastInsertId = `SELECT LAST_INSERT_ID() AS id_tache`;
-
-  try {
-      const connection = await db.client.getConnection();
-
-      // Insérer la tâche
-      await connection.execute(sqlTache, [nom, description, niveau, deadline, conditionOK, conditionTotal]);
-
-      // Récupérer l'id de la tâche insérée
-      const [idRows] = await connection.execute(sqlLastInsertId);
-      const idTache = idRows[0].id_tache;
-
-      // Insérer les membres associés
-      for (const idMembre of membres) {
-          await connection.execute(sqlTacheMembres, [idTache, idMembre]);
-      }
-      res.status(200).send({ success: true, message: `Tâche ${nom} ajoutée avec succès`, id_tache: idTache, nom, description, niveau, deadline, conditionOK, conditionTotal });
-  } catch (err) {
-      console.error('Erreur lors de l\'ajout de la tâche :', err);
-      res.status(500).send({ success: false, message: 'Erreur serveur', error: err });
-  }
-});
+    const { nom, niveau, deadline } = req.body;
+  
+    if (!nom || nom.trim() === '') {
+        return res.status(400).send({ success: false, message: 'Le nom de la tâche ne peut pas être vide' });
+    }
+    if (!niveau) {
+        return res.status(400).send({ success: false, message: 'Vous devez choisir un niveau' });
+    }
+    if (!deadline) {
+        return res.status(400).send({ success: false, message: 'Vous devez choisir une date limite' });
+    }
+  
+    const conditionTotal = 0;
+    const conditionOK = 0;
+  
+    const sqlTache = `
+        INSERT INTO taches (nom, niveau, deadline, nb_condition_ok, nb_condition_total)
+        VALUES (?, ?, ?, ?, ?)
+    `;
+  
+    const sqlLastInsertId = `SELECT LAST_INSERT_ID() AS id_tache`;
+  
+    try {
+        const connection = await db.client.getConnection();
+  
+        // Insérer la tâche
+        await connection.execute(sqlTache, [nom, niveau, deadline, conditionOK, conditionTotal]);
+  
+        // Récupérer l'id de la tâche insérée
+        const [idRows] = await connection.execute(sqlLastInsertId);
+        const idTache = idRows[0].id_tache;
+  
+        res.status(200).send({
+            success: true,
+            message: `Tâche ${nom} ajoutée avec succès`,
+            id_tache: idTache,
+            nom,
+            niveau,
+            deadline,
+            conditionOK,
+            conditionTotal
+        });
+    } catch (err) {
+        console.error('Erreur lors de l\'ajout de la tâche :', err);
+        res.status(500).send({ success: false, message: 'Erreur serveur', error: err });
+    }
+  });
+  
 
 
 

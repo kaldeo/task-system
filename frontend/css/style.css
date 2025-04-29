@@ -608,36 +608,61 @@ form#FormNouveauMembre{
 /*############################################################################*/
 
 .nouvelleDiv{
-    width: 100%;
+    width: 97%;
     height: 100%;
     position: relative;
+    padding: 20px;
 }
-.NomDuGroupeDivDansNouvelleDiv{
-    width: 10%;
-    height: 5%;
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    border-radius: 30px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: rgb(85, 85, 85);
-    color: white;
-}
+
 .bx.bxs-plus-square.bx-tada-hover{
     font-size: 50px;
-    position: absolute;
-    top: 3px;
-    right: 170px;
 }
+
+/*###################### Petits éléments ###########################*/
+.contain-all-info-haut-tache{
+    width: 100%;
+    height: 50px;
+    display: flex;
+    justify-content: space-between;
+}
+.contain-info-haut-tache{
+    width: 40%;
+    height: 50px;
+    display: flex;
+    gap: 20px;
+
+}
+
+.contain-id-tache{
+    width: 20%;
+    height: 50px;
+    background-color: rgb(85, 85, 85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    font-size: 20px;
+}
+#contain-id-tache2{
+    width: 30%;
+
+}
+#contain-info-haut-tache-droit{
+    justify-content: flex-end;
+}
+
 /*###################### Fenêtre ajouter une tâche ###########################*/
+#newPageContent2 {
+    width: 30%;
+    height: 30%;
+}
 .containALLCreerTache{
     width: 100%;
     height: 100%;
     display: flex;
     justify-content: space-around;
     align-items: center;
+    flex-direction: column;
 }
 .containCreerTache{
     width: 90%;
@@ -645,109 +670,35 @@ form#FormNouveauMembre{
     background-color: #5c5c5c;
     border-radius: 15px;
     display: flex;
-    justify-content: space-around;
-    align-items: center;
-}
-.DoubleBoxCreerTache{
-    height: 90%;
-    width: 45%;
-    background-color: #6d6d6d;
-    border-radius: 15px;
-    display: flex;
-}
-#DoubleBoxCreerTache1{
     flex-direction: column;
     justify-content: center;
     align-items: center;
-}
-.inputNomTache{
-    width: 60%;
-    height: 10%;
-    text-align: center;
-    border-radius: 30px;
-    border: none;
-
-}
-.zoneRechercheTache{
-    width: 60%;
-    min-height: 20%;
-    max-height: 80%;
-    padding: 5px;
-}
-input#rechercheMembreTache{
-    width: 100%;
-    min-height: 50px;
-    text-align: center;
-    border-radius: 30px;
-    border: none;
-
-}
-.resultatsRecherche::-webkit-scrollbar {
-    width: 8px;
-}
-.resultatsRecherche::-webkit-scrollbar-thumb {
-    background-color: #000000;
-    border-radius: 4px;
-}
-
-#DoubleBoxCreerTache2{
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-content: flex-start;
-    justify-content: center;
-    padding: 10px;
     gap: 10px;
-    overflow-y: auto;
+    font-size: 20px;
+
 }
-#DoubleBoxCreerTache2::-webkit-scrollbar {
-    width: 8px;
+.containCreerTache input{
+    width: 90%;
+    height: 50px;
+    text-align: center;
+    border-radius: 5px;
+    border: none;
+    font-size: 20px;
+
 }
-#DoubleBoxCreerTache2::-webkit-scrollbar-thumb {
-    background-color: #dcdcdc;
+
+#niveauTache{
+    font-size: 30px;
     border-radius: 4px;
 }
-.MembreDansAjoutrerTache{
-    min-width: 40%;
-    max-width: 40%;
-    height: 13%;
-    background-color: #929292;
-    border-radius: 40px;
-    display: flex;
-}
-.CoteGaucheAjTache{
-    height: 100%;
-    width: 75%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.NomMembreAjTache{
-    height: 70%;
-    width: 90%;
-    background-color: #b3b3b3;
-    border-radius: 50px;
-}
-.CoteDroitAjTache{
-    height: 100%;
-    width: 25%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.NiveauTache{
-    position: absolute;
-    top: 0;
-    left: 200px;
-}
+
+
 
 
 
 .BTNAjouterUneTache{
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
-    width: 20%;
-    height: 7%;
+    width: 90%;
+    height: 10%;
     border-radius: 30px;
     font-size: 20px;
     border: none;

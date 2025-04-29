@@ -155,7 +155,7 @@ function AjouterUnMembre(name) {
         }
     });
 }
-function AjouterTache(nom, description, niveau, deadline, membres) {
+function AjouterTache(nom, niveau, deadline) {
     $.ajax({
         url: url + '/ajouterTache',
         type: 'POST',
@@ -342,7 +342,7 @@ async function supprimerMembreModif(id_groupe, id_membre, membreDiv, name) {
 // ##################### Fonction mère #########################
 // #############################################################
 function ajouterGroupeALaListe(id_groupe, name, couleur, nb_membre) {
-    creerBoutonGroupe(id_groupe, name, couleur);
+    creerBoutonGroupe(id_groupe, name, couleur, nb_membre);
     creerSectionGroupeAvecMembres(id_groupe, name, couleur, nb_membre);
 }
 function ajouterMembreALaListe(id_membre, name) {
@@ -426,8 +426,7 @@ $(document).ready(function() {
 // ####################### Chaque BTN ##########################
 // #############################################################
 // Permet d'afficher la liste des groupes en bas à gauche de la page
-
-function creerBoutonGroupe(id_groupe, name, couleur) {
+function creerBoutonGroupe(id_groupe, name, couleur, nb_membre) {
     const listeDesGroupes = document.querySelector('.boitegroupes');
     const nouveauGroupe = document.createElement('button');
     nouveauGroupe.classList.add('ajouterGroupeButton');
@@ -442,7 +441,7 @@ function creerBoutonGroupe(id_groupe, name, couleur) {
 
     nouveauGroupe.addEventListener('click', function() {
         const idGroupe = this.dataset.id;
-        cacherContenu(idGroupe, name);
+        cacherContenu(idGroupe, name, nb_membre);
     });
 }
 // Ajout de l'événement pour fermer la nouvelle page
@@ -455,20 +454,46 @@ $(document).ready(function() {
         $('.TousCeuxAjoute').empty();
     });
 });
-// Permet d'afficher la page pour chaque boutons
 
-function cacherContenu(id_groupe, name) {
+// Permet d'afficher la page pour chaque boutons
+function cacherContenu(id_groupe, name, nb_membre) {
     $('.all').children().hide();
 
     const nouvelleDiv = document.createElement('div');
     nouvelleDiv.classList.add('nouvelleDiv');
     nouvelleDiv.innerHTML = `
-        <p style="color: white;">L'ID du groupe est : ${id_groupe}</p>
-        <br>
-        <i class='bx bxs-plus-square bx-tada-hover' style='color:#ffffff' id="CreerUneTache_${id_groupe}" data-id="${id_groupe}"></i>
-        <div class="NomDuGroupeDivDansNouvelleDiv">
-            <p>${name}</p>
+        
+
+        <div class='contain-all-info-haut-tache'>
+        
+
+
+            <div class='contain-info-haut-tache'>
+                <div class='contain-id-tache'>
+                    <p style="color: white;">ID ${id_groupe}</p>
+                </div>
+                <div class='contain-id-tache' id='contain-id-tache2'>
+                    <p style="color: white;">${name}</p>
+                </div>
+                <div class='contain-id-tache' id='contain-id-tache2'>
+                    <p style="color: white;">${nb_membre} membres</p>
+                </div>
+                <i class='bx bxs-plus-square bx-tada-hover' style='color:#ffffff' id="CreerUneTache_${id_groupe}" data-id="${id_groupe}"></i>
+            </div>
+
+            <div class='contain-info-haut-tache' id='contain-info-haut-tache-droit'>
+                <div class='contain-id-tache'>
+                    <p style="color: white;">12 🟠</p>
+                </div>
+                <div class='contain-id-tache'>
+                    <p style="color: white;">30 🟢</p>
+                </div>
+            </div>
         </div>
+
+        
+        
+        
     `;
 
     document.querySelector('.all').appendChild(nouvelleDiv);
