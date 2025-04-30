@@ -103,7 +103,7 @@ router.post('/groupes/:id_groupe/membres', async (req, res) => {
 ////////////////////// Tâches //////////////////////
 ////////////////////////////////////////////////////
 router.post('/ajouterTache', async (req, res) => {
-    const { nom, niveau, deadline } = req.body;
+    const { nom, niveau, deadline, idGroupe } = req.body;
   
     if (!nom || nom.trim() === '') {
         return res.status(400).send({ success: false, message: 'Le nom de la tâche ne peut pas être vide' });
@@ -122,7 +122,10 @@ router.post('/ajouterTache', async (req, res) => {
         INSERT INTO taches (nom, niveau, deadline, nb_condition_ok, nb_condition_total)
         VALUES (?, ?, ?, ?, ?)
     `;
-  
+    const sqlGroupe = `
+    UPDATE groupes SET \`en_cours\` = \`en_cours\` + 1 WHERE id_groupe = ?
+    `;
+
     const sqlLastInsertId = `SELECT LAST_INSERT_ID() AS id_tache`;
   
     try {
@@ -130,11 +133,19 @@ router.post('/ajouterTache', async (req, res) => {
   
         // Insérer la tâche
         await connection.execute(sqlTache, [nom, niveau, deadline, conditionOK, conditionTotal]);
-  
+        await connection.execute(sqlGroupe, [idGroupe]);
+
         // Récupérer l'id de la tâche insérée
         const [idRows] = await connection.execute(sqlLastInsertId);
         const idTache = idRows[0].id_tache;
   
+
+        const sqlJointure = `
+            INSERT INTO groupe_taches (id_groupe, id_tache) VALUES (?, ?)
+        `;
+        await connection.execute(sqlJointure, [idGroupe, idTache]);
+
+
         res.status(200).send({
             success: true,
             message: `Tâche ${nom} ajoutée avec succès`,

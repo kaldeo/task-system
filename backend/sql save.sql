@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : 127.0.0.1:3306
--- Généré le : mar. 29 avr. 2025 à 12:24
+-- Généré le : mar. 29 avr. 2025 à 14:03
 -- Version du serveur : 9.1.0
 -- Version de PHP : 8.3.14
 
@@ -34,14 +34,15 @@ CREATE TABLE IF NOT EXISTS `groupes` (
   `couleur` varchar(30) NOT NULL,
   `nb_membre` int NOT NULL,
   PRIMARY KEY (`id_groupe`)
-) ENGINE=MyISAM AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Déchargement des données de la table `groupes`
 --
 
 INSERT INTO `groupes` (`id_groupe`, `name`, `couleur`, `nb_membre`) VALUES
-(10, 'équipe de Gab', '#03e251', 2);
+(10, 'équipe de Gab', '#03e251', 2),
+(11, 'encore', '#e12323', 3);
 
 -- --------------------------------------------------------
 
@@ -68,7 +69,10 @@ INSERT INTO `groupe_membres` (`id_groupe`, `id_membre`) VALUES
 (7, 18),
 (8, 19),
 (10, 17),
-(10, 20);
+(10, 20),
+(11, 17),
+(11, 18),
+(11, 20);
 
 -- --------------------------------------------------------
 
@@ -102,13 +106,21 @@ DROP TABLE IF EXISTS `taches`;
 CREATE TABLE IF NOT EXISTS `taches` (
   `id_tache` int NOT NULL AUTO_INCREMENT,
   `nom` varchar(30) NOT NULL,
-  `description` text NOT NULL,
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
   `niveau` int NOT NULL,
   `deadline` date NOT NULL,
   `nb_condition_ok` int NOT NULL,
   `nb_condition_total` int NOT NULL,
+  `terminée` tinyint(1) NOT NULL,
   PRIMARY KEY (`id_tache`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Déchargement des données de la table `taches`
+--
+
+INSERT INTO `taches` (`id_tache`, `nom`, `description`, `niveau`, `deadline`, `nb_condition_ok`, `nb_condition_total`, `terminée`) VALUES
+(1, 'Nouvelle tâche', '', 2, '2025-05-10', 0, 0, 0);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

@@ -27,7 +27,7 @@ $(document).ready(function() {
             success: function(response) {
                 if (response.success) {
                     response.groupes.forEach(groupes => {
-                        ajouterGroupeALaListe(groupes.id_groupe, groupes.name, groupes.couleur, groupes.nb_membre);
+                        ajouterGroupeALaListe(groupes.id_groupe, groupes.name, groupes.couleur, groupes.nb_membre, groupes.en_cours);
                     });
                 } else {
                     afficherPopupErreur('Erreur lors du chargement des groupes');
@@ -69,7 +69,7 @@ $(document).ready(function() {
             success: function(response) {
                 if (response.success) {
                     response.taches.forEach(tache => {
-                        ajouterTacheALaListe(tache.id_tache, tache.nom, tache.description, tache.niveau, tache.deadline);
+                        ajouterTacheALaListe(tache.id_tache, tache.nom, tache.description, tache.niveau, tache.deadline, tache.nb_condition_ok, tache.nb_condition_total, tache.terminée);
                     });
                 } else {
                     afficherPopupErreur('Erreur lors du chargement des membres');
@@ -155,12 +155,12 @@ function AjouterUnMembre(name) {
         }
     });
 }
-function AjouterTache(nom, niveau, deadline) {
+function AjouterTache(nom, niveau, deadline, idGroupe) {
     $.ajax({
         url: url + '/ajouterTache',
         type: 'POST',
         contentType: 'application/json',
-        data: JSON.stringify({ nom, description, niveau, deadline, membres }),
+        data: JSON.stringify({ nom, niveau, deadline, idGroupe }),
         success: function(data) {
             if (data.success) {
                 afficherPopupSucces(data.message);
@@ -341,16 +341,17 @@ async function supprimerMembreModif(id_groupe, id_membre, membreDiv, name) {
 // #############################################################
 // ##################### Fonction mère #########################
 // #############################################################
-function ajouterGroupeALaListe(id_groupe, name, couleur, nb_membre) {
-    creerBoutonGroupe(id_groupe, name, couleur, nb_membre);
+function ajouterGroupeALaListe(id_groupe, name, couleur, nb_membre, en_cours) {
+    creerBoutonGroupe(id_groupe, name, couleur, nb_membre, en_cours);
     creerSectionGroupeAvecMembres(id_groupe, name, couleur, nb_membre);
 }
 function ajouterMembreALaListe(id_membre, name) {
     ajouterMembreALaListeGestion(id_membre, name);
     ajouterMembreALaListeNouveauGroupe(id_membre, name);
 }
-function ajouterTacheALaListe(id_tache, nom, description, niveau, deadline) {
+function ajouterTacheALaListe(id_tache, nom, description, niveau, deadline, nb_condition_ok, nb_condition_total, terminée) {
     creerSectionTaches(id_tache, nom, description, niveau, deadline);
+    creerSectionTachesDansGroupe(id_tache, nom, description, niveau, deadline);
 }
 
 
@@ -426,7 +427,7 @@ $(document).ready(function() {
 // ####################### Chaque BTN ##########################
 // #############################################################
 // Permet d'afficher la liste des groupes en bas à gauche de la page
-function creerBoutonGroupe(id_groupe, name, couleur, nb_membre) {
+function creerBoutonGroupe(id_groupe, name, couleur, nb_membre, en_cours) {
     const listeDesGroupes = document.querySelector('.boitegroupes');
     const nouveauGroupe = document.createElement('button');
     nouveauGroupe.classList.add('ajouterGroupeButton');
@@ -441,7 +442,7 @@ function creerBoutonGroupe(id_groupe, name, couleur, nb_membre) {
 
     nouveauGroupe.addEventListener('click', function() {
         const idGroupe = this.dataset.id;
-        cacherContenu(idGroupe, name, nb_membre);
+        cacherContenu(idGroupe, name, nb_membre, en_cours);
     });
 }
 // Ajout de l'événement pour fermer la nouvelle page
@@ -456,7 +457,7 @@ $(document).ready(function() {
 });
 
 // Permet d'afficher la page pour chaque boutons
-function cacherContenu(id_groupe, name, nb_membre) {
+function cacherContenu(id_groupe, name, nb_membre, en_cours) {
     $('.all').children().hide();
 
     const nouvelleDiv = document.createElement('div');
@@ -465,9 +466,6 @@ function cacherContenu(id_groupe, name, nb_membre) {
         
 
         <div class='contain-all-info-haut-tache'>
-        
-
-
             <div class='contain-info-haut-tache'>
                 <div class='contain-id-tache'>
                     <p style="color: white;">ID ${id_groupe}</p>
@@ -483,12 +481,28 @@ function cacherContenu(id_groupe, name, nb_membre) {
 
             <div class='contain-info-haut-tache' id='contain-info-haut-tache-droit'>
                 <div class='contain-id-tache'>
-                    <p style="color: white;">12 🟠</p>
+                    <p style="color: white;">${en_cours} 🟠</p>
                 </div>
                 <div class='contain-id-tache'>
                     <p style="color: white;">30 🟢</p>
                 </div>
             </div>
+        </div>
+
+        <div class='contain-all-taches'>
+            <section class='tache-dans-contain-all-taches'>
+            </section>
+            <section class='tache-dans-contain-all-taches'>
+            </section>
+            <section class='tache-dans-contain-all-taches'>
+            </section>
+            <section class='tache-dans-contain-all-taches'>
+            </section>
+            <section class='tache-dans-contain-all-taches'>
+            </section>
+
+
+
         </div>
 
         
@@ -509,95 +523,140 @@ function cacherContenu(id_groupe, name, nb_membre) {
     });    
 }
 
-
-
-
-
-
-
-
-document.addEventListener('DOMContentLoaded', function() {
-    // Fonction pour charger les membres du groupe pour la tâche
-    function chargerMembresPourTache() {
-        const newPageOverlay = document.querySelector('.newPageOverlayPourCreerTache');
-        const id_groupe = newPageOverlay ? newPageOverlay.getAttribute('data-id') : null;
-        console.log('ID du groupe :', id_groupe);
-        if (id_groupe) {
-            chargerMembresDuGroupePourTache(id_groupe);
+$(document).ready(function() {
+    $('#FormNouvelleTache').on('submit', function(event) {
+        event.preventDefault();
+        const idGroupe = $('.newPageOverlayPourCreerTache').attr('data-id');
+        const name = $('input.inputNomTache').val().trim();
+        const niveau = $('select#niveauTache').val().trim();
+        const deadline = $('input#deadlineTache').val().trim();
+        if (name === '') {
+            afficherPopupErreur('Veuillez entrer un nom');
+            return;
         }
-
-        const inputRechercheTache = document.getElementById('rechercheMembreTache');
-        const resultatsRechercheTache = document.getElementById('resultatsRechercheTache');
-
-        inputRechercheTache.addEventListener('input', function() {
-            const recherche = inputRechercheTache.value.toLowerCase();
-            if (recherche) {
-                afficherMembresFiltresTache(recherche, resultatsRechercheTache);
-            } else {
-                resultatsRechercheTache.innerHTML = '';
-                resultatsRechercheTache.style.display = 'none';
-            }
-        });
-    }
-
-    // Charger les membres pour la tâche lorsque la page de création de tâche s'affiche
-    $('.all').on('click', '[id^="CreerUneTache_"]', function() {
-        setTimeout(chargerMembresPourTache, 10);
+        AjouterTache(name,niveau,deadline,idGroupe);
     });
+
 });
 
-let membresDuGroupe = [];
 
-function chargerMembresDuGroupePourTache(id_groupe) {
-    $.ajax({
-        type: 'GET',
-        url: url + `/groupes/${id_groupe}/membres`,
-        success: function(response) {
-            if (response.success) {
-                membresDuGroupe = response.membres;
-                console.log('Membres du groupe chargés:', membresDuGroupe);
-            } else {
-                console.error('Erreur lors du chargement des membres du groupe:', response.message);
-            }
-        },
-        error: function() {
-            console.error('Erreur serveur lors du chargement des membres du groupe');
-        }
-    });
-}
 
-function afficherMembresFiltresTache(recherche, resultatsRechercheTache) {
-    resultatsRechercheTache.innerHTML = '';
 
-    const membresFiltres = membresDuGroupe.filter(membre => membre.name.toLowerCase().startsWith(recherche));
-
-    if (membresFiltres.length > 0) {
-        resultatsRechercheTache.style.display = 'block';
-    } else {
-        resultatsRechercheTache.style.display = 'none';
+function creerSectionTachesDansGroupe(id_tache, nom, description, niveau, deadline) {
+    const listeDesGroupesDansListe = document.querySelector('.contain-all-taches');
+    const nouveauGroupeDansListe = document.createElement('section');
+    nouveauGroupeDansListe.classList.add('tache-dans-contain-all-taches');
+    nouveauGroupeDansListe.dataset.idTache = id_tache;
+    let niveauColor;
+    switch (niveau) {
+        case 1:
+            niveauColor = 'green';
+            break;
+        case 2:
+            niveauColor = 'orange';
+            break;
+        case 3:
+            niveauColor = 'red';
+            break;
+        default:
+            niveauColor = 'grey';
+            break;
     }
+    nouveauGroupeDansListe.innerHTML = `
+        <div class="LigneDuHaut">
+            <div class="CoteGaucheDansGroupe">
+                <h1>${id_tache}</h1>
+                <h1>${nom}</h1>
+                <div class="BulleDeNiveau" style="background-color: ${niveauColor};">
+                    <h1>${niveau}</h1>
+                </div>
+                <h1>${deadline}</h1>
+            </div>
+            <div class="CoteDroitDansGroupe">
+                <i class='bx bxs-chevron-down-circle bx-tada-hover bx-lg' style="color: #FFFFFF;"></i>
+            </div>
+        </div>
+        <div class="SousLigneDuHaut">
 
-    membresFiltres.forEach(membre => {
-        const membreEnAttente = document.createElement('div');
-        membreEnAttente.classList.add('RechercheMembre');
-        membreEnAttente.dataset.id = membre.id_membre;
-        membreEnAttente.innerHTML = `
-            <button data-id="${membre.id_membre}">
-                <h1>${membre.name}</h1>
-            </button>`;
-        resultatsRechercheTache.appendChild(membreEnAttente);
+            <div class="ListeDesMembresDansSousLigneDuHaut"></div>
+            <div class="ListeDesMembresDansSousLigneDuHautAAjouter"></div>
 
-        const boutonMembre = membreEnAttente.querySelector('button');
-        boutonMembre.addEventListener('click', function() {
-            assignerMembreATache(membre.id_membre, membre.name);
-        });
+            <div class="ModificationsDansSousLigneDuHaut"></div>
+            <button class="EnregistrerLesModificationsBtn">Enregistrer les modifications</button>
+            <button class="SupprimerLeGroupeBtn" data-id-tache="${id_tache}" id="SupprimerLaTacheBtn">Supprimer le Groupe</button>
+        </div>`;
+    listeDesGroupesDansListe.appendChild(nouveauGroupeDansListe);
+
+    const btnSupprimerGroupe = nouveauGroupeDansListe.querySelector('#SupprimerLaTacheBtn');
+    btnSupprimerGroupe.addEventListener('click', function() {
+        const id_tache = this.dataset.idTache;
+        console.log(id_tache);
+        supprimerTache(id_tache);
     });
+
+    const icon = nouveauGroupeDansListe.querySelector('.bx.bxs-chevron-down-circle');
+    if (icon) {
+        icon.addEventListener('click', function() {
+            const section = this.closest('.GroupeDansGestion');
+            section.classList.toggle('agrandi');
+        });
+    }
 }
 
-function assignerMembreATache(id_membre, name) {
-    // Code pour assigner un membre à une tâche
-    console.log(`Membre ${name} (ID: ${id_membre}) assigné à la tâche.`);
-}
+
+
+// let membresDuGroupe = [];
+
+// function chargerMembresDuGroupePourTache(id_groupe) {
+//     $.ajax({
+//         type: 'GET',
+//         url: url + `/groupes/${id_groupe}/membres`,
+//         success: function(response) {
+//             if (response.success) {
+//                 membresDuGroupe = response.membres;
+//                 console.log('Membres du groupe chargés:', membresDuGroupe);
+//             } else {
+//                 console.error('Erreur lors du chargement des membres du groupe:', response.message);
+//             }
+//         },
+//         error: function() {
+//             console.error('Erreur serveur lors du chargement des membres du groupe');
+//         }
+//     });
+// }
+
+// function afficherMembresFiltresTache(recherche, resultatsRechercheTache) {
+//     resultatsRechercheTache.innerHTML = '';
+
+//     const membresFiltres = membresDuGroupe.filter(membre => membre.name.toLowerCase().startsWith(recherche));
+
+//     if (membresFiltres.length > 0) {
+//         resultatsRechercheTache.style.display = 'block';
+//     } else {
+//         resultatsRechercheTache.style.display = 'none';
+//     }
+
+//     membresFiltres.forEach(membre => {
+//         const membreEnAttente = document.createElement('div');
+//         membreEnAttente.classList.add('RechercheMembre');
+//         membreEnAttente.dataset.id = membre.id_membre;
+//         membreEnAttente.innerHTML = `
+//             <button data-id="${membre.id_membre}">
+//                 <h1>${membre.name}</h1>
+//             </button>`;
+//         resultatsRechercheTache.appendChild(membreEnAttente);
+
+//         const boutonMembre = membreEnAttente.querySelector('button');
+//         boutonMembre.addEventListener('click', function() {
+//             assignerMembreATache(membre.id_membre, membre.name);
+//         });
+//     });
+// }
+
+// function assignerMembreATache(id_membre, name) {
+//     // Code pour assigner un membre à une tâche
+//     console.log(`Membre ${name} (ID: ${id_membre}) assigné à la tâche.`);
+// }
 
 
 
