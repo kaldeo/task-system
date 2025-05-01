@@ -351,7 +351,9 @@ function ajouterMembreALaListe(id_membre, name) {
 }
 function ajouterTacheALaListe(id_tache, nom, description, niveau, deadline, nb_condition_ok, nb_condition_total, terminée) {
     creerSectionTaches(id_tache, nom, description, niveau, deadline);
-    creerSectionTachesDansGroupe(id_tache, nom, description, niveau, deadline);
+    // creerSectionTachesDansGroupe(id_tache, nom, description, niveau, deadline);
+    attendreEtCreerTache(id_tache, nom, description, niveau, deadline);
+
 }
 
 
@@ -490,24 +492,7 @@ function cacherContenu(id_groupe, name, nb_membre, en_cours) {
         </div>
 
         <div class='contain-all-taches'>
-            <section class='tache-dans-contain-all-taches'>
-            </section>
-            <section class='tache-dans-contain-all-taches'>
-            </section>
-            <section class='tache-dans-contain-all-taches'>
-            </section>
-            <section class='tache-dans-contain-all-taches'>
-            </section>
-            <section class='tache-dans-contain-all-taches'>
-            </section>
-
-
-
-        </div>
-
-        
-        
-        
+        </div> 
     `;
 
     document.querySelector('.all').appendChild(nouvelleDiv);
@@ -545,7 +530,7 @@ $(document).ready(function() {
 function creerSectionTachesDansGroupe(id_tache, nom, description, niveau, deadline) {
     const listeDesGroupesDansListe = document.querySelector('.contain-all-taches');
     const nouveauGroupeDansListe = document.createElement('section');
-    nouveauGroupeDansListe.classList.add('tache-dans-contain-all-taches');
+    nouveauGroupeDansListe.classList.add('GroupeDansGestion');
     nouveauGroupeDansListe.dataset.idTache = id_tache;
     let niveauColor;
     switch (niveau) {
@@ -602,6 +587,16 @@ function creerSectionTachesDansGroupe(id_tache, nom, description, niveau, deadli
         });
     }
 }
+function attendreEtCreerTache(id_tache, nom, description, niveau, deadline) {
+    const interval = setInterval(() => {
+        const conteneur = document.querySelector('.contain-all-taches');
+        if (conteneur) {
+            clearInterval(interval);
+            creerSectionTachesDansGroupe(id_tache, nom, description, niveau, deadline);
+        }
+    }, 50); // on vérifie toutes les 50 ms
+}
+
 
 
 
