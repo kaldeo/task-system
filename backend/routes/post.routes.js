@@ -160,9 +160,42 @@ router.post('/ajouterTache', async (req, res) => {
         console.error('Erreur lors de l\'ajout de la tâche :', err);
         res.status(500).send({ success: false, message: 'Erreur serveur', error: err });
     }
-  });
+});
   
 
+router.post('/getTachesDuGroupe', async (req, res) => {
+    const { id_groupe } = req.body;
 
+    if (!id_groupe) {
+        return res.status(400).send({ success: false, message: 'ID du groupe manquant' });
+    }
+    const sql = `
+        SELECT t.id_tache, t.nom, t.description, t.niveau, t.deadline
+        FROM taches t
+        INNER JOIN groupe_taches gt ON t.id_tache = gt.id_tache
+        WHERE gt.id_groupe = ?
+    `;
+    try {
+        const connection = await db.client.getConnection();
+        const [rows] = await connection.execute(sql, [id_groupe]);
+        res.status(200).send({ success: true, taches: rows });
+    } catch (err) {
+        console.error("Erreur récupération des tâches du groupe :", err);
+        res.status(500).send({ success: false, message: "Erreur serveur", error: err });
+    }
+});
+
+router.post('/terminerTache', async (req, res) => {
+    const { id_groupe } = req.body;
+    try {
+        const connection = await db.client.getConnection();
+        const requete = `UPDATE groupes SET termine = termine + 1 WHERE id_groupe = ?`; 
+        await connection.execute(requete, [id_groupe]);
+        res.send({ success: true });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send({ success: false });
+    }
+});
 
 module.exports = router;

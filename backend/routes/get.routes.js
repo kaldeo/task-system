@@ -3,17 +3,9 @@ const router = express.Router();
 const path = require('path');
 const db = require('../db');
 
-
 // Route pour la page d'accueil
 router.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../../frontend/html/index.html'));
-});
-
-
-router.get('/config/client', (req, res) => {
-    res.json({
-      PORT: process.env.DB_PORT,
-    });
 });
 
 ////////////////////////////////////////////////////

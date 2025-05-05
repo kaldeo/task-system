@@ -626,15 +626,14 @@ form#FormNouveauMembre{
     justify-content: space-between;
 }
 .contain-info-haut-tache{
-    width: 40%;
+    width: 45%;
     height: 50px;
     display: flex;
     gap: 20px;
-
 }
 
 .contain-id-tache{
-    width: 20%;
+    width: 40%;
     height: 50px;
     background-color: rgb(85, 85, 85);
     display: flex;
@@ -644,7 +643,7 @@ form#FormNouveauMembre{
     font-size: 20px;
 }
 #contain-id-tache2{
-    width: 30%;
+    width: 40%;
 
 }
 #contain-info-haut-tache-droit{
@@ -752,6 +751,69 @@ form#FormNouveauMembre{
     background-color: #006bb3;
     color: #e0e0e0;
 }
+
+
+
+/*###################### Caintain des tâches ###########################*/
+
+
+.Tache-dans-contain-des-taches-groupe{
+    width: 95%;
+    min-height: 50px;
+    background-color: rgb(63, 63, 63);
+    border-radius: 30px;
+    margin-top: 20px;
+    display: flex;
+    transition: min-height 0.5s ease;
+    padding: 10px;
+}
+
+.Tache-dans-contain-des-taches-groupe.agrandi {
+    min-height: 600px;
+    flex-direction: column;
+    align-items: center;
+}
+
+.Tache-dans-contain-des-taches-groupe.agrandi .SousLigneDuHaut {
+    display: flex;
+    transition: display 0.5s ease;
+    height: 500px;
+    margin-top: 10px;
+    background-color: rgb(98, 98, 98);
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+}
+.Tache-dans-contain-des-taches-groupe.agrandi .LigneDuHaut {
+    height: 50px;
+}
+
+.SousLigneDuHaut .btn-terminer-une-tache{
+    width: 90%;
+    height: 10%;
+    border-radius: 30px;
+    font-size: 15px;
+    border: none;
+    padding: 5px;
+    background-color: #4caf50;
+    color: white;
+    transition: background-color 0.3s;
+
+}
+
+/* .EnregistrerLesModificationsBtn{
+    width: 15%;
+    height: 20%;
+    
+    position: absolute;
+    bottom: 10px;
+    right: 17%;
+} */
+.SousLigneDuHaut .btn-terminer-une-tache:hover{
+    background-color: #3b883e;
+
+}
+
 /*############################################################################*/
 /*######################## Fenêtre Ajouter Groupe ############################*/
 /*############################################################################*/

@@ -14,24 +14,12 @@ app.listen(process.env.DB_PORT, () => {
   db.client.connect();
 });
 
-
-
-
-
-
-
-
-
-
-
 // Importation des routes
-
 const getRoutes = require('./routes/get.routes');
 const postRoutes = require('./routes/post.routes');
 const deleteRoutes = require('./routes/delete.routes');
 
 // Montage sans préfixe, les routes sont utilisées telles quelles
-
 app.use(getRoutes);
 app.use(postRoutes);
 app.use(deleteRoutes);

@@ -1,6 +1,5 @@
 const url = "http://localhost:7890";
 
-
 // #############################################################
 // #############################################################
 // #############################################################
@@ -27,7 +26,7 @@ $(document).ready(function() {
             success: function(response) {
                 if (response.success) {
                     response.groupes.forEach(groupes => {
-                        ajouterGroupeALaListe(groupes.id_groupe, groupes.name, groupes.couleur, groupes.nb_membre, groupes.en_cours);
+                        ajouterGroupeALaListe(groupes.id_groupe, groupes.name, groupes.couleur, groupes.nb_membre, groupes.en_cours, groupes.termine);
                     });
                 } else {
                     afficherPopupErreur('Erreur lors du chargement des groupes');
@@ -165,16 +164,13 @@ function AjouterTache(nom, niveau, deadline, idGroupe) {
             if (data.success) {
                 afficherPopupSucces(data.message);
                 ajouterTacheALaListe(data.id_tache, nom);
-                viderChamps();
             } else {
                 afficherPopupErreur('Erreur lors de l\'ajout de la tâche');
-                viderChamps();
             }
         },
         error: function(xhr, status, error) {
             console.error('Erreur:', error);
             afficherPopupErreur('Erreur lors de l\'ajout de la tâche');
-            viderChamps();
         }
     });
 }
@@ -210,6 +206,9 @@ function ajouterMembreAuGroupe(id_membre, name, id_groupe) {
         afficherPopupErreur(name + " est déjà dans la liste.");
     }
 }
+
+
+
 // #############################################################
 // ######################### DELETE ############################
 // #############################################################
@@ -341,8 +340,8 @@ async function supprimerMembreModif(id_groupe, id_membre, membreDiv, name) {
 // #############################################################
 // ##################### Fonction mère #########################
 // #############################################################
-function ajouterGroupeALaListe(id_groupe, name, couleur, nb_membre, en_cours) {
-    creerBoutonGroupe(id_groupe, name, couleur, nb_membre, en_cours);
+function ajouterGroupeALaListe(id_groupe, name, couleur, nb_membre, en_cours, termine) {
+    creerBoutonGroupe(id_groupe, name, couleur, nb_membre, en_cours, termine);
     creerSectionGroupeAvecMembres(id_groupe, name, couleur, nb_membre);
 }
 function ajouterMembreALaListe(id_membre, name) {
@@ -429,7 +428,7 @@ $(document).ready(function() {
 // ####################### Chaque BTN ##########################
 // #############################################################
 // Permet d'afficher la liste des groupes en bas à gauche de la page
-function creerBoutonGroupe(id_groupe, name, couleur, nb_membre, en_cours) {
+function creerBoutonGroupe(id_groupe, name, couleur, nb_membre, en_cours, termine) {
     const listeDesGroupes = document.querySelector('.boitegroupes');
     const nouveauGroupe = document.createElement('button');
     nouveauGroupe.classList.add('ajouterGroupeButton');
@@ -444,7 +443,7 @@ function creerBoutonGroupe(id_groupe, name, couleur, nb_membre, en_cours) {
 
     nouveauGroupe.addEventListener('click', function() {
         const idGroupe = this.dataset.id;
-        cacherContenu(idGroupe, name, nb_membre, en_cours);
+        cacherContenu(idGroupe, name, nb_membre, en_cours, termine);
     });
 }
 // Ajout de l'événement pour fermer la nouvelle page
@@ -459,14 +458,12 @@ $(document).ready(function() {
 });
 
 // Permet d'afficher la page pour chaque boutons
-function cacherContenu(id_groupe, name, nb_membre, en_cours) {
+function cacherContenu(id_groupe, name, nb_membre, en_cours, termine) {
     $('.all').children().hide();
 
-    const nouvelleDiv = document.createElement('div');
+    const nouvelleDiv = document.createElement('div'); // ➤ Création en premier
     nouvelleDiv.classList.add('nouvelleDiv');
     nouvelleDiv.innerHTML = `
-        
-
         <div class='contain-all-info-haut-tache'>
             <div class='contain-info-haut-tache'>
                 <div class='contain-id-tache'>
@@ -480,24 +477,40 @@ function cacherContenu(id_groupe, name, nb_membre, en_cours) {
                 </div>
                 <i class='bx bxs-plus-square bx-tada-hover' style='color:#ffffff' id="CreerUneTache_${id_groupe}" data-id="${id_groupe}"></i>
             </div>
-
             <div class='contain-info-haut-tache' id='contain-info-haut-tache-droit'>
                 <div class='contain-id-tache'>
-                    <p style="color: white;">${en_cours} 🟠</p>
+                    <p style="color: white;">${en_cours} 🟠 en cours</p>
                 </div>
                 <div class='contain-id-tache'>
-                    <p style="color: white;">30 🟢</p>
+                    <p style="color: white;">${termine} 🟢 terminées</p>
                 </div>
             </div>
         </div>
-
-        <div class='contain-all-taches'>
-        </div> 
+        <div class='contain-all-taches' data-id="${id_groupe}"></div> 
     `;
 
-    document.querySelector('.all').appendChild(nouvelleDiv);
+    document.querySelector('.all').appendChild(nouvelleDiv); // ➤ Insertion avant l'AJAX
 
-    // Utiliser la délégation d'événements pour gérer les clics sur toutes les icônes `CreerUneTache`
+    const conteneurTaches = nouvelleDiv.querySelector('.contain-all-taches'); // ➤ Maintenant ça existe ✅
+
+    $.ajax({
+        url: url + '/getTachesDuGroupe',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ id_groupe }),
+        success: function(response) {
+            conteneurTaches.innerHTML = '';
+
+            response.taches.forEach(t => {
+                attendreEtCreerTache(t.id_tache, t.nom, t.description, t.niveau, t.deadline, conteneurTaches);
+            });
+        },
+        error: function(err) {
+            console.error("Erreur récupération des tâches :", err);
+        }
+    });
+
+    // Gestion de clic pour créer une tâche
     $('.all').on('click', `#CreerUneTache_${id_groupe}`, function() {
         const idGroupe = $(this).data('id');
         $('.newPageOverlayPourCreerTache').attr('data-id', idGroupe);
@@ -508,29 +521,10 @@ function cacherContenu(id_groupe, name, nb_membre, en_cours) {
     });    
 }
 
-$(document).ready(function() {
-    $('#FormNouvelleTache').on('submit', function(event) {
-        event.preventDefault();
-        const idGroupe = $('.newPageOverlayPourCreerTache').attr('data-id');
-        const name = $('input.inputNomTache').val().trim();
-        const niveau = $('select#niveauTache').val().trim();
-        const deadline = $('input#deadlineTache').val().trim();
-        if (name === '') {
-            afficherPopupErreur('Veuillez entrer un nom');
-            return;
-        }
-        AjouterTache(name,niveau,deadline,idGroupe);
-    });
 
-});
-
-
-
-
-function creerSectionTachesDansGroupe(id_tache, nom, description, niveau, deadline) {
-    const listeDesGroupesDansListe = document.querySelector('.contain-all-taches');
+function creerSectionTachesDansGroupe(id_tache, nom, description, niveau, deadline, conteneur) {
     const nouveauGroupeDansListe = document.createElement('section');
-    nouveauGroupeDansListe.classList.add('GroupeDansGestion');
+    nouveauGroupeDansListe.classList.add('Tache-dans-contain-des-taches-groupe');
     nouveauGroupeDansListe.dataset.idTache = id_tache;
     let niveauColor;
     switch (niveau) {
@@ -562,116 +556,71 @@ function creerSectionTachesDansGroupe(id_tache, nom, description, niveau, deadli
             </div>
         </div>
         <div class="SousLigneDuHaut">
+            <button class='btn-terminer-une-tache'>Tâches terminée</button>
+        </div>
+        
+        `;
+        
+    conteneur.appendChild(nouveauGroupeDansListe);
 
-            <div class="ListeDesMembresDansSousLigneDuHaut"></div>
-            <div class="ListeDesMembresDansSousLigneDuHautAAjouter"></div>
+    const btnTerminer = nouveauGroupeDansListe.querySelector('.btn-terminer-une-tache');
+    btnTerminer.addEventListener('click', function() {
+        // Remonte jusqu'au parent qui contient data-id = id_groupe
+        const conteneurTaches = this.closest('.contain-all-taches');
+        const id_groupe = conteneurTaches.dataset.id;
 
-            <div class="ModificationsDansSousLigneDuHaut"></div>
-            <button class="EnregistrerLesModificationsBtn">Enregistrer les modifications</button>
-            <button class="SupprimerLeGroupeBtn" data-id-tache="${id_tache}" id="SupprimerLaTacheBtn">Supprimer le Groupe</button>
-        </div>`;
-    listeDesGroupesDansListe.appendChild(nouveauGroupeDansListe);
-
-    const btnSupprimerGroupe = nouveauGroupeDansListe.querySelector('#SupprimerLaTacheBtn');
-    btnSupprimerGroupe.addEventListener('click', function() {
-        const id_tache = this.dataset.idTache;
-        console.log(id_tache);
-        supprimerTache(id_tache);
+        $.ajax({
+            url: url + '/terminerTache',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ id_groupe }), // on envoie l'id_groupe
+            success: function(response) {
+                afficherPopupSucces("Tâche terminée");
+            },
+            error: function(err) {
+                console.error('Erreur lors de la mise à jour :', err);
+            }
+        });
     });
+
+
+
+
 
     const icon = nouveauGroupeDansListe.querySelector('.bx.bxs-chevron-down-circle');
     if (icon) {
         icon.addEventListener('click', function() {
-            const section = this.closest('.GroupeDansGestion');
+            const section = this.closest('.Tache-dans-contain-des-taches-groupe');
             section.classList.toggle('agrandi');
         });
     }
 }
-function attendreEtCreerTache(id_tache, nom, description, niveau, deadline) {
+function attendreEtCreerTache(id_tache, nom, description, niveau, deadline, conteneur) {
     const interval = setInterval(() => {
-        const conteneur = document.querySelector('.contain-all-taches');
         if (conteneur) {
             clearInterval(interval);
-            creerSectionTachesDansGroupe(id_tache, nom, description, niveau, deadline);
+            creerSectionTachesDansGroupe(id_tache, nom, description, niveau, deadline, conteneur);
         }
-    }, 50); // on vérifie toutes les 50 ms
+    }, 50);
 }
 
 
 
+$(document).ready(function() {
+    $('#FormNouvelleTache').on('submit', function(event) {
+        event.preventDefault();
+        const idGroupe = $('.newPageOverlayPourCreerTache').attr('data-id');
+        const name = $('input.inputNomTache').val().trim();
+        const niveau = $('select#niveauTache').val().trim();
+        const deadline = $('input#deadlineTache').val().trim();
+        if (name === '') {
+            afficherPopupErreur('Veuillez entrer un nom');
+            return;
+        }
+        AjouterTache(name,niveau,deadline,idGroupe);
+    });
 
-// let membresDuGroupe = [];
-
-// function chargerMembresDuGroupePourTache(id_groupe) {
-//     $.ajax({
-//         type: 'GET',
-//         url: url + `/groupes/${id_groupe}/membres`,
-//         success: function(response) {
-//             if (response.success) {
-//                 membresDuGroupe = response.membres;
-//                 console.log('Membres du groupe chargés:', membresDuGroupe);
-//             } else {
-//                 console.error('Erreur lors du chargement des membres du groupe:', response.message);
-//             }
-//         },
-//         error: function() {
-//             console.error('Erreur serveur lors du chargement des membres du groupe');
-//         }
-//     });
-// }
-
-// function afficherMembresFiltresTache(recherche, resultatsRechercheTache) {
-//     resultatsRechercheTache.innerHTML = '';
-
-//     const membresFiltres = membresDuGroupe.filter(membre => membre.name.toLowerCase().startsWith(recherche));
-
-//     if (membresFiltres.length > 0) {
-//         resultatsRechercheTache.style.display = 'block';
-//     } else {
-//         resultatsRechercheTache.style.display = 'none';
-//     }
-
-//     membresFiltres.forEach(membre => {
-//         const membreEnAttente = document.createElement('div');
-//         membreEnAttente.classList.add('RechercheMembre');
-//         membreEnAttente.dataset.id = membre.id_membre;
-//         membreEnAttente.innerHTML = `
-//             <button data-id="${membre.id_membre}">
-//                 <h1>${membre.name}</h1>
-//             </button>`;
-//         resultatsRechercheTache.appendChild(membreEnAttente);
-
-//         const boutonMembre = membreEnAttente.querySelector('button');
-//         boutonMembre.addEventListener('click', function() {
-//             assignerMembreATache(membre.id_membre, membre.name);
-//         });
-//     });
-// }
-
-// function assignerMembreATache(id_membre, name) {
-//     // Code pour assigner un membre à une tâche
-//     console.log(`Membre ${name} (ID: ${id_membre}) assigné à la tâche.`);
-// }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+});
 
 
 // #############################################################
